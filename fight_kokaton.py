@@ -140,6 +140,34 @@ class Bomb:
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
 
+class Explosion:
+    """
+    爆発エフェクトに関するクラス
+    """
+    
+    def __init__(self, bomb:"Bomb"):
+        self.explo_list = [[]]
+        self.img = pg.image.load(f"explosion.gif")
+        self.img_rev = pg.transform.flip(self.img, True, True)
+        self.rct = self.img.get_rect()
+        self.rct_rev = self.img_rev.get_rect()
+        self.rct.center = bomb.rct.center
+        self.rct_rev.center = bomb.rct.center
+        self.explo_list += [self.img,self.rct]
+        self.explo_list += [self.img_rev, self.rct_rev]
+        self.life = 100
+    
+    def update(self, screen: pg.Surface):
+        self.life -= 1
+        if self.life > 0:
+            if self.life %2 == 0:
+                screen.blit(self.explo_list[0][0], self.explo_list[0][1])
+            else:
+                screen.blit(self.explo_list[1][0], self.explo_list[1][1])
+
+
+
+
 class Score:
     """
     撃墜スコアに関するクラス
@@ -162,9 +190,6 @@ class Score:
         screen.blit(self.txt, self.rct)
 
 
-
-
-
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -174,6 +199,7 @@ def main():
     beam = None #ビームインスタンス生成
     bombs = [Bomb((255, 0, 0), 10)for i in range(NUM_OF_BOMBS)]
     beams = []
+    explo_list = []
     score = Score()
     clock = pg.time.Clock()
     tmr = 0
@@ -204,6 +230,8 @@ def main():
                         bombs[i] = None
                         beams[j] = None
                         score.score_num += 1
+                        explo_list += [Explosion(bomb)]
+                        explo_list = [explo for exp]
         
 
         key_lst = pg.key.get_pressed()
