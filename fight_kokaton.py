@@ -7,6 +7,7 @@ import pygame as pg
 
 WIDTH = 1100  # ゲームウィンドウの幅
 HEIGHT = 650  # ゲームウィンドウの高さ
+NUM_OF_BOMBS = 5 #爆弾の個数
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -147,6 +148,7 @@ def main():
     bird = Bird((300, 200))
     bomb = Bomb((255, 0, 0), 10)
     beam = None #ビームインスタンス生成
+    bombs = [Bomb((255, 0, 0), 10)for i in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -157,9 +159,8 @@ def main():
                  # スペースキー押下でBeamクラスのインスタンス生成
                  beam = Beam(bird)            
         screen.blit(bg_img, [0, 0])
-        if bomb is not None:
+        for bomb in bombs:
             if bird.rct.colliderect(bomb.rct):
-                # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
                 bird.change_img(8, screen)
                 fonto = pg.font.Font(None, 80)
                 txt = fonto.render("Game Over", True, (255, 0, 0))
@@ -167,18 +168,21 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-        if beam is not None:
-            if beam.rct.colliderect(bomb.rct): #ビームと爆弾が衝突
-                bird.change_img(6, screen)
-                pg.display.update()
-                bomb = None
-                beam = None
+        for i, bomb in enumerate(bombs):
+            if beam is not None:
+                if beam.rct.colliderect(bomb.rct): #ビームと爆弾が衝突
+                    bird.change_img(6, screen)
+                    pg.display.update()
+                    bombs[i] = None
+                    beam = None
+        
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         if beam is not None:
             beam.update(screen) 
-        if bomb is not None:  
+        bombs = [bomb for bomb in bombs if bomb is not None] # Noneが入っていないbombリスト
+        for bomb in bombs: 
             bomb.update(screen)
         pg.display.update()
         tmr += 1
